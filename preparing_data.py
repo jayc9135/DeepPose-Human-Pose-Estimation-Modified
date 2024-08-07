@@ -27,14 +27,6 @@ class MyImageFolder(datasets.ImageFolder):
 
 
 def update_joint_coordinate(joint_coord, orig_img, out_size, mode='resize'):
-    # print(f"joint_coord shape: {joint_coord.shape}")  # Debugging print
-    # print(f"orig_img shape: {orig_img.shape}")  # Debugging print
-    #
-    # if joint_coord.shape[1] != 14:
-    #     raise ValueError(
-    #         f"Expected joint_coord shape (2, 14), but got {joint_coord.shape}")
-
-    # Og from here
     joints = np.zeros((2, 14))
 
     if mode == 'resize':
@@ -49,62 +41,13 @@ def prepare_joints(dataset_path, train_data, valid_data, test_data, img_size):
     # Read Joints Coordination
     joint_content = loadmat(joint_path)
     joints_coord = joint_content['joints']
-    # print(">>>>>>>>>>>>", joints_coord.shape)
-    # joints_coord = joints_coord.transpose(2, 0, 1)
-    # print(">>>>>>>>>>>>", joints_coord.shape)
-    # joints_coord = joints_coord[:, :2, :]
-    # print(">>>>>>>>>>>>", joints_coord.shape)
 
     joints_coord = joints_coord.transpose(2, 1, 0)
     joints_coord = joints_coord[:, :2, :]
-    # print(">>>>>>>>>>>>", joints_coord.shape)
 
     num_samples = joints_coord.shape[0]
     joints = torch.zeros((num_samples, 28))
     joints_2d = torch.zeros((num_samples, 2, 14))
-
-    # # for Train Joints
-    # for batch_idx, (images, label) in enumerate(train_data):
-    #     for i in range(len(label[0])):
-    #         img = io.imread(label[0][i])
-    #         coord_index = int(label[0][i][-8:-4]) - 1
-    #         scaled_joint = update_joint_coordinate(joints_coord[coord_index],
-    #                                                img,
-    #                                                img_size,
-    #                                                mode='resize')
-    #         joints_2d[coord_index] = torch.tensor(scaled_joint)
-    #         scaled_joint = coordinate_normalize(scaled_joint)
-    #         for j in range(14):
-    #             joints[coord_index][2 * j] = scaled_joint[0][j]
-    #             joints[coord_index][2 * j + 1] = scaled_joint[1][j]
-    #
-    # # for Valid Joints
-    # for batch_idx, (images, label) in enumerate(valid_data):
-    #     for i in range(len(label[0])):
-    #         img = io.imread(label[0][i])
-    #         scaled_joint = update_joint_coordinate(
-    #             joints_coord[int(label[0][i][-8:-4]) - 1], img, img_size,
-    #             mode='resize')
-    #         joints_2d[int(label[0][i][-8:-4]) - 1] = torch.tensor(scaled_joint)
-    #         scaled_joint = coordinate_normalize(scaled_joint)
-    #         for j in range(14):
-    #             joints[int(label[0][i][-8:-4]) - 1][2 * j] = scaled_joint[0][j]
-    #             joints[int(label[0][i][-8:-4]) - 1][2 * j + 1] = \
-    #             scaled_joint[1][j]
-    #
-    # # for Test Joints
-    # for batch_idx, (images, label) in enumerate(test_data):
-    #     for i in range(len(label[0])):
-    #         img = io.imread(label[0][i])
-    #         scaled_joint = update_joint_coordinate(
-    #             joints_coord[int(label[0][i][-8:-4]) - 1], img, img_size,
-    #             mode='resize')
-    #         joints_2d[int(label[0][i][-8:-4]) - 1] = torch.tensor(scaled_joint)
-    #         scaled_joint = coordinate_normalize(scaled_joint)
-    #         for j in range(14):
-    #             joints[int(label[0][i][-8:-4]) - 1][2 * j] = scaled_joint[0][j]
-    #             joints[int(label[0][i][-8:-4]) - 1][2 * j + 1] = \
-    #             scaled_joint[1][j]
 
     def process_data(data, true_joints, true_joints_2d):
         for batch_idx, (images, label) in enumerate(data):
